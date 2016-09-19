@@ -19,4 +19,13 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="title_activity_survey_tabs">SurveyTabs</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="prompt_email_or_name">Email alebo prihlasovacie meno</string>
+    <string name="Kid_choice">Vyberte si aktívne dieťa:</string>
+    <string name="title_activity_atabs_surveys">Tabuľkové prehľady</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="User_Name">Užívateľ:</string>
 </resources>

@@ -13,13 +13,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
-public class MainUserActivity extends AppCompatActivity
+import layout.LearningSurvey;
+
+
+public class MainUserActivity
+        extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+        // interface OnFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // ------------------------------------
+        // -------- Make it Full Screen -------
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // ------------------------------------
+
         setContentView(R.layout.activity_main_user);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -88,9 +100,14 @@ public class MainUserActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_camera)
+        {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+            LearningSurvey.newInstance("Predmet1","Predmet2").onAttach(this.getApplicationContext());
+        }
+        else if (id == R.id.nav_gallery)
+        {
+            LearningSurvey.newInstance("Predmet1","Predmet2").onAttach(this.getApplicationContext());
 
         } else if (id == R.id.nav_slideshow) {
 

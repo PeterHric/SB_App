@@ -35,7 +35,6 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -219,12 +218,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return true; // email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 2;
     }
 
     /**
@@ -392,11 +391,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
+        private final String mNameOrEmail;
         private final String mPassword;
 
         UserLoginTask(String email, String password) {
-            mEmail = email;
+            mNameOrEmail = email;
             mPassword = password;
         }
 
@@ -404,15 +403,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // -----------------------------------------------------------------------------------------
         // ToDo: Relocate this feature to some extra class accessible anywhere
         // -----------------------------------------------------------------------------------------
-
-        String loginCredentialsJsonStr = "{" +
-                "\"serviceName\" : \"GuardService\"," +
-                "\"methodName\" : \"checkLicence\"," +
-                "\"parameters\" : [" +
-                "\"vlkjan@gmail.com\"," +
-                "\"test\"" +
-                "    ]" +
-                "}";
 
         String guardServerUrl = "http://www.brainycoach.com/guard/api/index.php";
 
@@ -442,12 +432,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
 
+            // Build authentification string with received credentials
+            String loginCredentialsJsonStr = "{" +
+                    "\"serviceName\" : \"GuardService\"," +
+                    "\"methodName\" : \"checkLicence\"," +
+                    "\"parameters\" : [\"" + mNameOrEmail + "\",\"" + mPassword +
+                    // "\"vlkjan@gmail.com\"," +  //"\"test\"" +
+                    "\"]" +
+                    "}";
+
+
+            String serverResponse = "";
             // attempt authentication against a network service.
             try
             {
                 // Simulate network access.
                 //Thread.sleep(2000);
-                String serverResponse = postJsonText(guardServerUrl,loginCredentialsJsonStr);
+                serverResponse = postJsonText(guardServerUrl,loginCredentialsJsonStr);
                 Log.println(Log.DEBUG,"Server response: ",serverResponse);
             }
             catch (IOException ioe)
@@ -455,15 +456,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
 
-            for (String credential : DEFAULT_CREDENTIALS) {
+            // Perform credentials verification
+            //if(!serverResponse.contains("\"status\":\"OK\""))
+            if(!serverResponse.contains("activeTo"))
+                return false;
+
+            /* Separate test for email - account and correct password.
+            for (String credential : DEFAULT_CREDENTIALS)
+            {
                 String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
+                if (pieces[0].equals(mNameOrEmail))
+                {
                     // Account exists, return true if the password matches.
                     return pieces[1].equals(mPassword);
                 }
             }
+            */
 
             // TODO: register the new account here.
+            // This will not be needed here - as we acquire new users differently :)
+
+            // The given credentials are valid !
             return true;
         }
 
@@ -475,7 +488,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
                 finish();
                 Intent i = new Intent(getApplicationContext(), MainUserActivity.class);
-                i.putExtra("UserName", mEmail);
+                i.putExtra("UserName", mNameOrEmail);
+                i.putExtra("Pwd", mPassword);
                 startActivity(i);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
