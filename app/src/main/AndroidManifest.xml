@@ -49,6 +49,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sbm.bc.smartbooksmobile.MainUserActivity" />
         </activity>
+        <activity
+            android:name=".ActivitySwipeTabs"
+            android:label="@string/title_activity_activity_swipe_tabs"
+            android:parentActivityName=".MainUserActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sbm.bc.smartbooksmobile.MainUserActivity" />
+        </activity>
     </application>
 
 </manifest>

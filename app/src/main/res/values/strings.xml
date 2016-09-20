@@ -25,7 +25,8 @@
     <string name="Kid_choice">Vyberte si aktívne dieťa:</string>
     <string name="title_activity_atabs_surveys">Tabuľkové prehľady</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="User_Name">Užívateľ:</string>
+    <string name="title_activity_activity_swipe_tabs">Prehľady</string>
 </resources>

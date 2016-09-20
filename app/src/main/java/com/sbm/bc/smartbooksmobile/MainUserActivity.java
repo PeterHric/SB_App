@@ -1,5 +1,7 @@
 package com.sbm.bc.smartbooksmobile;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,8 +22,17 @@ import layout.LearningSurvey;
 
 public class MainUserActivity
         extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-        // interface OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+                   LearningSurvey.OnFragmentInteractionListener {
+
+    String userName = "";
+    String pwd = "";
+
+    @Override
+    public void onFragmentInteraction(Uri uri)
+    {
+        // ToDo:  What should be done here ?
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +67,13 @@ public class MainUserActivity
 
         // String value = intent.getStringExtra("key"); //if it's a string you stored.
         Bundle extras = getIntent().getExtras();
+
+        // Extract data sent by LoginActivity
         if(extras !=null)
         {
-            Log.println(Log.INFO , "UserName: " , extras.getString("UserName"));
+            userName = extras.getString("UserName");
+            pwd      = extras.getString("Pwd");
+            Log.println(Log.INFO , "UserName " , userName);
         }
     }
 
@@ -100,24 +115,30 @@ public class MainUserActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera)
+        switch(id)
         {
-            // Handle the camera action
-            LearningSurvey.newInstance("Predmet1","Predmet2").onAttach(this.getApplicationContext());
+            case R.id.nav_camera:
+            {
+                // Handle the camera action
+                LearningSurvey ls = LearningSurvey.newInstance("User Name: " + userName,"Password: " + pwd);
+                ls.onAttach(this);
+
+                //ls.onCreateView(this.LAYOUT_INFLATER_SERVICE,null /*this.Container*/,false); //public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
+                break;
+            }
+            case R.id.nav_gallery:
+            case R.id.nav_slideshow:
+            case R.id.nav_manage:
+            case R.id.nav_share:
+            case R.id.nav_send:
+
+                Intent i = new Intent(getApplicationContext(), ActivitySwipeTabs.class);
+                //i.putExtra("UserName", mNameOrEmail);
+                //i.putExtra("Pwd", mPassword);
+                startActivity(i);
+                break;
         }
-        else if (id == R.id.nav_gallery)
-        {
-            LearningSurvey.newInstance("Predmet1","Predmet2").onAttach(this.getApplicationContext());
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
