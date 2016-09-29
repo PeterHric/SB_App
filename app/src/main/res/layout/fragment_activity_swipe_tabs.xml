@@ -8,29 +8,64 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.sbm.bc.smartbooksmobile.ActivitySwipeTabs$PlaceholderFragment">
 
-    <TextView
-        android:id="@+id/section_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Swipe tabs activity" />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textAlignment="center"
+        android:divider="#c8c8c8">
 
-    <RadioButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New RadioButton"
-        android:id="@+id/radioButton2"
-        android:layout_below="@+id/section_label"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="182dp" />
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="0dp"
+            android:paddingBottom="5dp">
 
-    <RatingBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ratingBar"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/radioButton2"
-        android:layout_toEndOf="@+id/radioButton2"
-        android:layout_marginBottom="54dp" />
+            <TextView
+                android:id="@+id/section_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stav vedomostí"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Predmet"
+                android:id="@+id/Subject"
+                android:layout_column="0"
+                android:paddingRight="15dp" />
+
+            <TextView
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Téma"
+                android:id="@+id/Topic"
+                android:layout_column="1"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp" />
+
+            <TextView
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Dátum"
+                android:id="@+id/Date"
+                android:layout_column="2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/Talar"
+                android:layout_column="3"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:src="@drawable/ic_school_black_24dp" />
+        </TableRow>
+    </TableLayout>
 
 </RelativeLayout>

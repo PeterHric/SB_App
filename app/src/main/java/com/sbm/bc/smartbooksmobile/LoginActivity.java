@@ -62,8 +62,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * TODO: remove after connecting to a real authentication system.
      */
     private static final String[] DEFAULT_CREDENTIALS = new String[]{
-            "vlkjan@gmail.com:EMAIL", "test:PWD"
+            ":EMAIL", ":PWD"
     };
+
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -403,7 +404,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // -----------------------------------------------------------------------------------------
         // ToDo: Relocate this feature to some extra class accessible anywhere
         // -----------------------------------------------------------------------------------------
-
+        /*
         String guardServerUrl = "http://www.brainycoach.com/guard/api/index.php";
 
         public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -427,28 +428,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
         }
+        */
         // ------------------------------------------------------------------------------------------
 
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            // Build authentification string with received credentials
-            String loginCredentialsJsonStr = "{" +
-                    "\"serviceName\" : \"GuardService\"," +
-                    "\"methodName\" : \"checkLicence\"," +
-                    "\"parameters\" : [\"" + mNameOrEmail + "\",\"" + mPassword +
-                    // "\"vlkjan@gmail.com\"," +  //"\"test\"" +
-                    "\"]" +
-                    "}";
-
-
-            String serverResponse = "";
+            String serverResponse;
             // attempt authentication against a network service.
             try
             {
                 // Simulate network access.
                 //Thread.sleep(2000);
-                serverResponse = postJsonText(guardServerUrl,loginCredentialsJsonStr);
+                serverResponse = JsonSender.postJsonText(JsonSender.guardServerUrl,JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
                 Log.println(Log.DEBUG,"Server response: ",serverResponse);
             }
             catch (IOException ioe)

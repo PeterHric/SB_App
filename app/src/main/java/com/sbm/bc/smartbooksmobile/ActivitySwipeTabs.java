@@ -64,10 +64,12 @@ public class ActivitySwipeTabs extends AppCompatActivity {
     }
 
 
+    // Add swipe tabs here !
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_activity_swipe_tabs, menu);
+        getMenuInflater().inflate(R.menu.menu_survey_tabs, menu);
         return true;
     }
 
@@ -90,18 +92,17 @@ public class ActivitySwipeTabs extends AppCompatActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+
         /**
-         * The fragment argument representing the section number for this
-         * fragment.
+         * The fragment argument representing the section number for this fragment.
          */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+        private static final String ARG_SECTION_NUMBER = "#";
 
         public PlaceholderFragment() {
         }
 
         /**
-         * Returns a new instance of this fragment for the given section
-         * number.
+         * Returns a new instance of this fragment for the given section number.
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();

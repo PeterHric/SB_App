@@ -25,8 +25,8 @@ public class MainUserActivity
         implements NavigationView.OnNavigationItemSelectedListener,
                    LearningSurvey.OnFragmentInteractionListener {
 
-    String userName = "";
-    String pwd = "";
+    private String mNameOrEmail = "";
+    private String mPassword = "";
 
     @Override
     public void onFragmentInteraction(Uri uri)
@@ -71,9 +71,9 @@ public class MainUserActivity
         // Extract data sent by LoginActivity
         if(extras !=null)
         {
-            userName = extras.getString("UserName");
-            pwd      = extras.getString("Pwd");
-            Log.println(Log.INFO , "UserName " , userName);
+            mNameOrEmail = extras.getString("UserName");
+            mPassword = extras.getString("Pwd");
+            Log.println(Log.INFO, "UserName ", mNameOrEmail);
         }
     }
 
@@ -120,7 +120,7 @@ public class MainUserActivity
             case R.id.nav_camera:
             {
                 // Handle the camera action
-                LearningSurvey ls = LearningSurvey.newInstance("User Name: " + userName,"Password: " + pwd);
+                LearningSurvey ls = LearningSurvey.newInstance("User Name: " + mNameOrEmail, "Password: " + mPassword);
                 ls.onAttach(this);
 
                 //ls.onCreateView(this.LAYOUT_INFLATER_SERVICE,null /*this.Container*/,false); //public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
@@ -133,8 +133,8 @@ public class MainUserActivity
             case R.id.nav_send:
 
                 Intent i = new Intent(getApplicationContext(), ActivitySwipeTabs.class);
-                //i.putExtra("UserName", mNameOrEmail);
-                //i.putExtra("Pwd", mPassword);
+                i.putExtra("UserName", mNameOrEmail);
+                i.putExtra("Pwd", mPassword);
                 startActivity(i);
                 break;
         }

@@ -148,6 +148,9 @@ public class SurveyTabs extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
+                    // Naucenost:
+                    // GuasrServiceMobile->getGuartUsers($email, $password);
+                    // UserPDO->guardUserById($id);
                     return "SECTION 1";
                 case 1:
                     return "SECTION 2";
