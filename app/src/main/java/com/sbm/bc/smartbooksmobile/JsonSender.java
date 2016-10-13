@@ -17,15 +17,26 @@ import okhttp3.Response;
 
 public final class JsonSender {
 
-    static public String guardServerUrl = "http://www.brainycoach.com/guard/api/index.php";
+    // Guard - Jano Vlk
+    //static public String phpServerUrl = "http://www.brainycoach.com/guard/api/index.php";
+    // Brainy - Mario Kahun
+    // static public String phpServerUrl = "http://www.brainycoach.com/_api/api/bc/index.php";
+    // Mobile service - Peto Hric 'n Silvo Adamik
+    //static public String phpServerUrl = "http://www.brainycoach.com/bc-mobile-client-server/index.php";
+    // Peter H. Local service:
+    // static public String phpServerUrl = "http://172.30.20.18/mobile_client_server/index.php";
+
+    // Tmp - for testing where Mario copied his new stuff:
+    static public String phpServerUrl = "http://www.brainycoach.com/app/api/index.php";
 
     // JSON>> Build authentication string with received credentials
     static public String getLoginCredentialString (String nameOrEmail, String pwd)
     {
+        //  public function login($email, $password, $appkey, $code, $autoLogin)
         return "{" +
-                "\"serviceName\" : \"GuardService\"," +
-                "\"methodName\" : \"checkLicence\"," +
-                "\"parameters\" : [\"" + nameOrEmail + "\",\"" + pwd +
+                "\"serviceName\" : \"SecurityService\"," +
+                "\"methodName\" : \"login\"," +
+                "\"parameters\" : [\"" + nameOrEmail + "\",\"" + pwd + "\",\"" + 123 /*appkey*/ + "\",\"" + 456 /*code*/ + "\",\"" + 0 /*autoLogin*/ +
                 "\"]" +
                 "}";
     }

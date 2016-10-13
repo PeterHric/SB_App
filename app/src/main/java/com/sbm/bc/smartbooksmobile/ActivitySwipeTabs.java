@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 public class ActivitySwipeTabs extends AppCompatActivity {
@@ -28,7 +30,7 @@ public class ActivitySwipeTabs extends AppCompatActivity {
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    static private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -36,7 +38,13 @@ public class ActivitySwipeTabs extends AppCompatActivity {
     private ViewPager mViewPager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        // ------------------------------------
+        // -------- Make it Full Screen -------
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // ------------------------------------
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activity_swipe_tabs);
 
@@ -64,7 +72,7 @@ public class ActivitySwipeTabs extends AppCompatActivity {
     }
 
 
-    // Add swipe tabs here !
+    // Add menu items here !
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -73,6 +81,7 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         return true;
     }
 
+    // Action bar events handling
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -92,6 +101,13 @@ public class ActivitySwipeTabs extends AppCompatActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+
+
+        /*  Custom Web View display
+         * 	   String customHtml = "<html><body><h1>Hello, WebView</h1></body></html>";
+         *     webView.loadData(customHtml, "text/html", "UTF-8");
+         * */
+        private WebView webView;
 
         /**
          * The fragment argument representing the section number for this fragment.
@@ -113,14 +129,19 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_activity_swipe_tabs, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        {
+            //View rootView = inflater.inflate(R.layout.fragment_activity_swipe_tabs, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_learning_survey, container, false);
+            //TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            TextView textView = (TextView) rootView.findViewById(R.id.textView5);
+            //textView.setText(getString(R.string.prehlad, getArguments().getInt(ARG_SECTION_NUMBER)));
+            int sectionNum = getArguments().getInt(ARG_SECTION_NUMBER);
+            textView.setText( mSectionsPagerAdapter.getPageTitle(sectionNum) );
+
             return rootView;
         }
-    }
+    } // End of class ActivitySwipeTabs
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -139,6 +160,8 @@ public class ActivitySwipeTabs extends AppCompatActivity {
             return PlaceholderFragment.newInstance(position + 1);
         }
 
+
+
         @Override
         public int getCount() {
             // Show 3 total pages.
@@ -149,11 +172,11 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "Prehľad učenia";
                 case 1:
-                    return "SECTION 2";
+                    return "Predmety - stav vedomostí.";
                 case 2:
-                    return "SECTION 3";
+                    return "Časový prehľad";
             }
             return null;
         }

@@ -39,12 +39,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -405,7 +399,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // ToDo: Relocate this feature to some extra class accessible anywhere
         // -----------------------------------------------------------------------------------------
         /*
-        String guardServerUrl = "http://www.brainycoach.com/guard/api/index.php";
+        String phpServerUrl = "http://www.brainycoach.com/guard/api/index.php";
 
         public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         OkHttpClient client = new OkHttpClient();
@@ -440,7 +434,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             {
                 // Simulate network access.
                 //Thread.sleep(2000);
-                serverResponse = JsonSender.postJsonText(JsonSender.guardServerUrl,JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
+                serverResponse = JsonSender.postJsonText(JsonSender.phpServerUrl, JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
                 Log.println(Log.DEBUG,"Server response: ",serverResponse);
             }
             catch (IOException ioe)
@@ -484,7 +478,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 i.putExtra("Pwd", mPassword);
                 startActivity(i);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.setError(getString(R.string.error_invalid_credentials));
                 mPasswordView.requestFocus();
             }
         }
