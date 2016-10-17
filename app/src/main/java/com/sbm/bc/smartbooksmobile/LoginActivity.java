@@ -19,6 +19,7 @@ import android.os.Build.VERSION;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,6 +29,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -63,6 +65,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+
+    public enum LoginErrorCode
+    {
+        OK,
+        NO_NETWORK_ACCESS,
+        WRONG_USER_TYPE,
+        UNKNOWWN_NAME_OR_EMAIL,
+        WRONG_PWD,
+        UNKNOWN_ERROR
+    }
+
+    private LoginErrorCode mLoginErrCode = LoginErrorCode.OK;
+
+    public void setLoginErrorCode(LoginErrorCode lec) { mLoginErrCode = lec; }
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -206,19 +222,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, password, this);
             mAuthTask.execute((Void) null);
         }
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return true; // email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 2;
+        return true; // password.length() > 2;
     }
 
     /**
@@ -350,6 +364,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
+    public void onShowPwd(View view)
+    {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+        TextView passwd = (TextView) findViewById(R.id.password);
+        //CharSequence text = passwd.getText();
+        //passwd.setText("");
+
+        if(checked)
+            passwd.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD |InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);  // Set visible password
+        else
+            passwd.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);  // Set ordinary password
+
+        //passwd.setText(text);
+    }
+
+    public void onRememberMe(View view)
+    {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+    }
+
     /**
      * Use an AsyncTask to fetch the user's email addresses on a background thread, and update
      * the email text field with results on the main UI thread.
@@ -388,42 +424,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         private final String mNameOrEmail;
         private final String mPassword;
+        private final LoginActivity mLa;
+        private LoginErrorCode mLoginErrCode = LoginErrorCode.OK;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String email, String password, LoginActivity la) {
             mNameOrEmail = email;
             mPassword = password;
+            mLa = la;
         }
 
-
-        // -----------------------------------------------------------------------------------------
-        // ToDo: Relocate this feature to some extra class accessible anywhere
-        // -----------------------------------------------------------------------------------------
-        /*
-        String phpServerUrl = "http://www.brainycoach.com/guard/api/index.php";
-
-        public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        OkHttpClient client = new OkHttpClient();
-
-        String postJsonText(String url, String json) throws IOException {
-            RequestBody body = RequestBody.create(JSON, json);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(body)
-                    .build();
-            try
-            {
-                Response response = client.newCall(request).execute();
-                return response.body().string();
-            }
-            catch (IOException ioe)
-            {
-                Log.println(Log.ERROR , "EXCEPTION" , "Exception when trying to post JSON string: " + json + " Reason: " + ioe.getMessage());
-                return "";
-            }
-
-        }
-        */
-        // ------------------------------------------------------------------------------------------
 
         @Override
         protected Boolean doInBackground(Void... params) {
@@ -432,8 +441,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // attempt authentication against a network service.
             try
             {
-                // Simulate network access.
-                //Thread.sleep(2000);
+                // Send req. to server via JSON
                 serverResponse = JsonSender.postJsonText(JsonSender.phpServerUrl, JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
                 Log.println(Log.DEBUG,"Server response: ",serverResponse);
             }
@@ -443,24 +451,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             // Perform credentials verification
-            //if(!serverResponse.contains("\"status\":\"OK\""))
-            if(!serverResponse.contains("activeTo"))
-                return false;
-
-            /* Separate test for email - account and correct password.
-            for (String credential : DEFAULT_CREDENTIALS)
+            if(serverResponse.contains("\"userType\":\"MASTER\""))
             {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mNameOrEmail))
-                {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
+                mLoginErrCode = LoginErrorCode.OK;
+                mLa.setLoginErrorCode(mLoginErrCode );
             }
-            */
-
-            // TODO: register the new account here.
-            // This will not be needed here - as we acquire new users differently :)
+            else if(serverResponse.contains("\"userType\":\"CHILD\""))
+            {
+                mLoginErrCode = LoginErrorCode.WRONG_USER_TYPE;
+                mLa.setLoginErrorCode(mLoginErrCode);
+                return false;
+            }
+            else if(serverResponse == "X")
+            {
+                mLoginErrCode = LoginErrorCode.NO_NETWORK_ACCESS;
+                mLa.setLoginErrorCode(mLoginErrCode);
+                return false;
+            }
+            else if (serverResponse.contains("service handler error"))
+            {
+                mLoginErrCode = LoginErrorCode.UNKNOWWN_NAME_OR_EMAIL;
+                mLa.setLoginErrorCode(mLoginErrCode);
+                return false;
+            }
+            else
+            {
+                mLoginErrCode = LoginErrorCode.UNKNOWN_ERROR;
+                mLa.setLoginErrorCode(mLoginErrCode);
+                return false;
+            }
 
             // The given credentials are valid !
             return true;
@@ -471,14 +490,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
+            if (success)
+            {
                 finish();
                 Intent i = new Intent(getApplicationContext(), MainUserActivity.class);
                 i.putExtra("UserName", mNameOrEmail);
                 i.putExtra("Pwd", mPassword);
                 startActivity(i);
-            } else {
-                mPasswordView.setError(getString(R.string.error_invalid_credentials));
+            } else
+            {
+                switch(mLoginErrCode)
+                {
+                    case NO_NETWORK_ACCESS:
+                        mPasswordView.setError(getString(R.string.network_unavailable));
+                        break;
+
+                    case WRONG_USER_TYPE:
+                        mPasswordView.setError(getString(R.string.error_incorrect_user_type));
+                        break;
+
+                    case UNKNOWWN_NAME_OR_EMAIL:
+                        mPasswordView.setError(getString(R.string.error_invalid_credentials));
+                        break;
+
+                    case UNKNOWN_ERROR:
+                        mPasswordView.setError(getString(R.string.error_unknown_sever_error));
+                        break;
+
+                    case OK:
+                    default:
+                        // Should never happen !
+                        Log.println(Log.ERROR, "Unexpected error code: ", mLoginErrCode.toString());
+                        break;
+                }
+
                 mPasswordView.requestFocus();
             }
         }

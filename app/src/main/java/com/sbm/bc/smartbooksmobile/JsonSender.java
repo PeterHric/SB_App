@@ -24,10 +24,10 @@ public final class JsonSender {
     // Mobile service - Peto Hric 'n Silvo Adamik
     //static public String phpServerUrl = "http://www.brainycoach.com/bc-mobile-client-server/index.php";
     // Peter H. Local service:
-    // static public String phpServerUrl = "http://172.30.20.18/mobile_client_server/index.php";
+    static public String phpServerUrl = "http://172.30.20.16/bc-mobile-client-server/index.php";
 
     // Tmp - for testing where Mario copied his new stuff:
-    static public String phpServerUrl = "http://www.brainycoach.com/app/api/index.php";
+    //static public String phpServerUrl = "http://www.brainycoach.com/app/api/index.php";
 
     // JSON>> Build authentication string with received credentials
     static public String getLoginCredentialString (String nameOrEmail, String pwd)
@@ -79,7 +79,7 @@ public final class JsonSender {
         {
             // Toast.makeText(this.getApplicationContext(), "Connection fail", Toast.LENGTH_SHORT).show();
             Log.println(Log.ERROR , "EXCEPTION" , "Exception when trying to post JSON string: " + json + " Reason: " + ioe.getMessage());
-            return "";
+            return "X";
         }
 
     }

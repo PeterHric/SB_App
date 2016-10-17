@@ -3,24 +3,25 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
+    <string name="prompt_password">Heslo (voliteľne)</string>
+    <string name="action_sign_in">Prihlásiť, alebo registorvať</string>
+    <string name="action_sign_in_short">Prihlásiť</string>
     <string name="error_invalid_credentials">Neznáme meno/email, alebo nesprávne heslo.</string>
+    <string name="error_incorrect_user_type">Zadali ste meno a heslo detského konta. Vstup je povolený len rodičom.</string>
+    <string name="error_unknown_sever_error">Nezistená chyba servera. Skúste neskôr prosím.</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="title_activity_main_user">MainUserActivity</string>
+    <string name="title_activity_main_user">Základný pohľad</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-    <string name="title_activity_survey_tabs">SurveyTabs</string>
+    <string name="title_activity_survey_tabs">Prehľadové tabuľky</string>
     <string name="prehlad">Prehľad: %1$d</string>
     <string name="prompt_email_or_name">Email alebo prihlasovacie meno</string>
     <string name="Kid_choice">Vyberte si aktívne dieťa:</string>
@@ -29,5 +30,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="User_Name">Užívateľ:</string>
-    <string name="title_activity_activity_swipe_tabs">Prehľady</string>
+    <string name="title_activity_activity_swipe_tabs">Posúvateľné prehľady štatistík</string>
+    <string name="network_unavailable">Sieťové spojenie nedostupné.</string>
 </resources>

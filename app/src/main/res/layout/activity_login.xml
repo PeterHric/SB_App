@@ -1,4 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:app2="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,26 +13,36 @@
     tools:context="com.sbm.bc.smartbooksmobile.LoginActivity">
 
     <!-- Login progress -->
-    <ProgressBar
-        android:id="@+id/login_progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone" />
 
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="150dp">
+        style="@android:style/Widget.Holo.ScrollView">
 
         <LinearLayout
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingTop="50dp">
+            android:weightSum="1">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="292dp"
+                app:srcCompat="@drawable/ic_lady_sb"
+                android:id="@+id/ladySBimage"
+                android:layout_weight="0.38"
+                android:cropToPadding="false" />
+
+            <ProgressBar
+                android:id="@+id/login_progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                android:layout_weight="0.38" />
 
             <AutoCompleteTextView
                 android:id="@+id/email"
@@ -62,13 +74,44 @@
                     android:imeActionId="@+id/login"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
-                    android:inputType="textPassword|textVisiblePassword"
+                    android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true"
                     android:focusable="true"
-                    android:enabled="true" />
+                    android:enabled="true"
+                    android:textStyle="normal|italic" />
 
             </android.support.design.widget.TextInputLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <CheckBox
+                        android:text="Zobraz heslo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/showPwd"
+                        android:checked="false"
+                        android:onClick="onShowPwd"/>
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <CheckBox
+                        android:text="Pamätaj si ma"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/rememberLogin"
+                        android:checked="true"
+                        android:onClick="onRememberMe"
+                        android:duplicateParentState="false" />
+                </TableRow>
+
+            </TableLayout>
 
             <Button
                 android:id="@+id/email_sign_in_button"
@@ -76,11 +119,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/action_sign_in"
+                android:text="@string/action_sign_in_short"
                 android:textStyle="bold"
                 android:focusable="true"
                 android:enabled="true" />
 
         </LinearLayout>
     </ScrollView>
+
 </LinearLayout>
