@@ -414,7 +414,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(List<String> emailAddressCollection) {
             addEmailsToAutoComplete(emailAddressCollection);
         }
-    }
+    } // class SetupEmailAutoCompleteTask
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -425,11 +425,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         private final String mNameOrEmail;
         private final String mPassword;
         private final LoginActivity mLa;
+        private String mServerResponse;
         private LoginErrorCode mLoginErrCode = LoginErrorCode.OK;
 
         UserLoginTask(String email, String password, LoginActivity la) {
             mNameOrEmail = email;
             mPassword = password;
+            mServerResponse = "X";
             mLa = la;
         }
 
@@ -437,13 +439,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            String serverResponse;
             // attempt authentication against a network service.
             try
             {
                 // Send req. to server via JSON
-                serverResponse = JsonSender.postJsonText(JsonSender.phpServerUrl, JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
-                Log.println(Log.DEBUG,"Server response: ",serverResponse);
+                mServerResponse = JsonSender.postJsonText(JsonSender.phpServerUrl, JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
+                Log.println(Log.DEBUG,"Server response: ", mServerResponse);
             }
             catch (IOException ioe)
             {
@@ -451,24 +452,24 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             // Perform credentials verification
-            if(serverResponse.contains("\"userType\":\"MASTER\""))
+            if(mServerResponse.contains("\"userType\":\"MASTER\""))
             {
                 mLoginErrCode = LoginErrorCode.OK;
                 mLa.setLoginErrorCode(mLoginErrCode );
             }
-            else if(serverResponse.contains("\"userType\":\"CHILD\""))
+            else if(mServerResponse.contains("\"userType\":\"CHILD\""))
             {
                 mLoginErrCode = LoginErrorCode.WRONG_USER_TYPE;
                 mLa.setLoginErrorCode(mLoginErrCode);
                 return false;
             }
-            else if(serverResponse == "X")
+            else if(mServerResponse == "X")
             {
                 mLoginErrCode = LoginErrorCode.NO_NETWORK_ACCESS;
                 mLa.setLoginErrorCode(mLoginErrCode);
                 return false;
             }
-            else if (serverResponse.contains("service handler error"))
+            else if (mServerResponse.contains("service handler error"))
             {
                 mLoginErrCode = LoginErrorCode.UNKNOWWN_NAME_OR_EMAIL;
                 mLa.setLoginErrorCode(mLoginErrCode);
@@ -488,7 +489,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(false);
+            showProgress(true);
 
             if (success)
             {
@@ -496,8 +497,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Intent i = new Intent(getApplicationContext(), MainUserActivity.class);
                 i.putExtra("UserName", mNameOrEmail);
                 i.putExtra("Pwd", mPassword);
+                i.putExtra("ServerResponse", mServerResponse);
                 startActivity(i);
-            } else
+            }
+            else
             {
                 switch(mLoginErrCode)
                 {
@@ -529,10 +532,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
-        protected void onCancelled() {
+        protected void onCancelled()
+        {
             mAuthTask = null;
             showProgress(false);
         }
-    }
-}
+
+    } //  public class UserLoginTask
+
+} // public class LoginActivity
 

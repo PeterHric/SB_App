@@ -27,14 +27,6 @@
             android:orientation="vertical"
             android:weightSum="1">
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="292dp"
-                app:srcCompat="@drawable/ic_lady_sb"
-                android:id="@+id/ladySBimage"
-                android:layout_weight="0.38"
-                android:cropToPadding="false" />
-
             <ProgressBar
                 android:id="@+id/login_progress"
                 style="?android:attr/progressBarStyleLarge"
@@ -43,6 +35,14 @@
                 android:layout_marginBottom="8dp"
                 android:visibility="gone"
                 android:layout_weight="0.38" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="292dp"
+                app:srcCompat="@drawable/ic_lady_sb"
+                android:id="@+id/ladySBimage"
+                android:layout_weight="0.38"
+                android:cropToPadding="false" />
 
             <AutoCompleteTextView
                 android:id="@+id/email"

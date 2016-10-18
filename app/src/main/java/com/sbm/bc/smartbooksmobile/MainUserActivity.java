@@ -2,6 +2,7 @@ package com.sbm.bc.smartbooksmobile;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -16,6 +17,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import layout.LearningSurvey;
 
@@ -25,8 +30,14 @@ public class MainUserActivity
         implements NavigationView.OnNavigationItemSelectedListener,
                    LearningSurvey.OnFragmentInteractionListener {
 
-    private String mNameOrEmail = "";
-    private String mPassword = "";
+    private String mNameOrEmail       = "";
+    private String mPassword          = "";
+    private String mFirtsNameCustomer = "";
+    private String mLastNameCustomer  = "";
+    private String mIdCustomer        = "";
+    private String mId                = "";
+    private String mContact           = "";
+    private String mEmail             = "";
 
     @Override
     public void onFragmentInteraction(Uri uri)
@@ -73,8 +84,50 @@ public class MainUserActivity
         {
             mNameOrEmail = extras.getString("UserName");
             mPassword = extras.getString("Pwd");
-            Log.println(Log.INFO, "UserName ", mNameOrEmail);
+            String serverResponse = extras.getString("ServerResponse");
+
+            try
+            {
+                JSONObject Jobject = new JSONObject(serverResponse);
+                mFirtsNameCustomer = Jobject.getString("firstName");
+                mLastNameCustomer  = Jobject.getString("lastName");
+                mIdCustomer        = Jobject.getString("idCustomer");
+                mId                = Jobject.getString("id");
+                mContact           = Jobject.getString("contact");
+                mEmail             = Jobject.getString("email");
+            }
+            catch (JSONException jsEx)
+            {
+                Log.println(Log.ERROR,"Exception caught !", "Exception on parsing JSON Server Response : " + jsEx.getMessage());
+            }
+            //Log.println(Log.INFO, "UserName ", mNameOrEmail);
         }
+
+        //hideSoftKeyboard();
+
+        // Retrieve info about children and display it
+    }
+
+    // Hides the soft keyboard - but does not work somehow !
+    public void hideSoftKeyboard()
+    {
+        int mysdk = Build.VERSION.SDK_INT;
+
+        if (Build.VERSION.SDK_INT >= 14)
+        {
+            getWindow().setSoftInputMode(
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+            );
+        }
+        else if (Build.VERSION.SDK_INT >= 5)
+        {
+            if(getCurrentFocus()!=null)
+            {
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            }
+        }
+
     }
 
     @Override

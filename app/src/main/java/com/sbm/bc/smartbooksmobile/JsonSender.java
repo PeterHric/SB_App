@@ -51,6 +51,14 @@ public final class JsonSender {
                 "\"parameters\" : [\"" + customerEmailOrName + "\"]}";
     }
 
+    // JSON>> Build string to retrieve all users (kids) associated with a customer (parent)
+    static public String getKidsOfCustomerString ()
+    {
+        return "{" +
+                "\"serviceName\" : \"StatisticsService\"," + //ToDo: Find serviceName
+                "\"methodName\" : \"getAllUserLicenciesByCustomer\"," +  //ToDo: Or use : getAllUserLicenciesByCustomer() instead ! Create own service and a method !
+                "}";
+    }
 
     // JSON>> Build string to retrieve all themes a kid has learned (and the relevant theme/learn info)
     static public String getListOfLearnedThemesString (String userId)
