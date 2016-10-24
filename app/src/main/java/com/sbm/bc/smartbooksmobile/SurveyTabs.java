@@ -20,6 +20,20 @@ import android.widget.TextView;
 
 public class SurveyTabs extends AppCompatActivity {
 
+    /*
+     Can use these for quick messages to show on touch on day in weekly view
+
+    showDialog("Downloaded " + result + " bytes");
+
+    public void showMessage(String tag, String message)
+    {
+      String s = tag + ":" + message;
+      Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
+      toast.show();
+      Log.d(tag,message);
+    }
+    */
+
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a

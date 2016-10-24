@@ -83,8 +83,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
+    private View     mProgressView;
+    private View     mLoginFormView;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -420,6 +421,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
+    // ToDo: Refactor to type AsyncTask<Void, Void, LoginErrorCode>, or even use ServerRequestTask
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mNameOrEmail;
@@ -435,7 +437,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mLa = la;
         }
 
-
         @Override
         protected Boolean doInBackground(Void... params) {
 
@@ -444,7 +445,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             {
                 // Send req. to server via JSON
                 mServerResponse = JsonSender.postJsonText(JsonSender.phpServerUrl, JsonSender.getLoginCredentialString(mNameOrEmail,mPassword));
-                Log.println(Log.DEBUG,"Server response: ", mServerResponse);
+                //Log.println(Log.DEBUG,"Server response: ", mServerResponse);
             }
             catch (IOException ioe)
             {

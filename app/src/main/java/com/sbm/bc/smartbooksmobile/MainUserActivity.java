@@ -18,26 +18,68 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 import layout.LearningSurvey;
 
 
-public class MainUserActivity
-        extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-                   LearningSurvey.OnFragmentInteractionListener {
-
+public class MainUserActivity  extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener,
+                                                                     LearningSurvey.OnFragmentInteractionListener
+{
     private String mNameOrEmail       = "";
     private String mPassword          = "";
     private String mFirtsNameCustomer = "";
     private String mLastNameCustomer  = "";
-    private String mIdCustomer        = "";
+    private int    mIdCustomer        = 0;
     private String mId                = "";
     private String mContact           = "";
     private String mEmail             = "";
+
+    private String mServerResponse    = "";
+
+    // ---------------------------------------------------------------------------------------
+    // Listener for the async task instance - wait to finish data retrieval
+    private ServerRequestTask.TaskListener taskListener = new ServerRequestTask.TaskListener()
+    {
+        @Override
+        public void onFinished(String serverResponse)
+        {
+            mServerResponse = serverResponse;
+
+            try {
+                JSONObject jsnObj = new JSONObject(mServerResponse);
+                JSONArray jsnArray = jsnObj.getJSONArray("firstName");
+                String kids = "Vase deti:";
+                for (int i = 0; i < jsnArray.length(); ++i)
+                {
+                    Log.println(Log.DEBUG,"Your children: ", jsnArray.getJSONObject(i).toString());
+                    kids += "  " + jsnArray.getJSONObject(i).toString();
+                }
+
+                kids += " delete this line";
+                //Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
+                //toast.show();
+            }
+            catch (JSONException jsnEx)
+            {
+                Log.println(Log.ERROR, "JSONException: ", jsnEx.toString());
+            }
+            catch(Exception e)
+            {
+                Log.println(Log.ERROR, "Some Exception: ", e.toString());
+            }
+        }
+    };
+
+    // And the async task instance itself - used for asynchronous data retrieval from server DB
+    private ServerRequestTask mServRqTask = new ServerRequestTask(taskListener);
+    // ---------------------------------------------------------------------------------------
 
     @Override
     public void onFragmentInteraction(Uri uri)
@@ -91,7 +133,7 @@ public class MainUserActivity
                 JSONObject Jobject = new JSONObject(serverResponse);
                 mFirtsNameCustomer = Jobject.getString("firstName");
                 mLastNameCustomer  = Jobject.getString("lastName");
-                mIdCustomer        = Jobject.getString("idCustomer");
+                mIdCustomer        = Jobject.getInt("idCustomer"); //getString("idCustomer");
                 mId                = Jobject.getString("id");
                 mContact           = Jobject.getString("contact");
                 mEmail             = Jobject.getString("email");
@@ -100,12 +142,44 @@ public class MainUserActivity
             {
                 Log.println(Log.ERROR,"Exception caught !", "Exception on parsing JSON Server Response : " + jsEx.getMessage());
             }
+
             //Log.println(Log.INFO, "UserName ", mNameOrEmail);
         }
 
-        //hideSoftKeyboard();
+        // ToDo: Retrieve info about children and display it
+    }
 
-        // Retrieve info about children and display it
+
+    @Override
+    protected void onStart() //onFinishInflate()
+    {
+        super.onStart();
+
+        /*
+        try
+        {
+            Thread.sleep(1000);
+        }
+        catch(InterruptedException iex)
+        {
+
+        }
+        */
+
+        //Set user name
+        if ((mFirtsNameCustomer != "") || (mLastNameCustomer != "")) {
+            // ToDo: Why this returns null ?
+            TextView nhun = (TextView) findViewById(R.id.NaviHeaderUserName);
+            if(nhun != null)
+                nhun.setText(mFirtsNameCustomer + mLastNameCustomer);
+        }
+
+        hideSoftKeyboard();
+
+        // Start server request to obtain children data
+        //mServRqTask.execute(JsonSender.getKidsOfCustomerString()); // This returns empty response. Is it no user logged in ?
+        //mServRqTask.execute(JsonSender.getKidsOfParentString(mNameOrEmail));
+        mServRqTask.execute(JsonSender.getKidsOfCustomerIdString(mIdCustomer));
     }
 
     // Hides the soft keyboard - but does not work somehow !

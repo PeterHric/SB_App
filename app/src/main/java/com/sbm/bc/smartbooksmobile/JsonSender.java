@@ -41,23 +41,33 @@ public final class JsonSender {
                 "}";
     }
 
-
+/*
     // JSON>> Build string to retrieve all users (kids) associated with a customer (parent)
     static public String getKidsOfParentString (String customerEmailOrName)
     {
         return "{" +
-                "\"serviceName\" : \"LicenceServiceMobile\"," + //ToDo: Find serviceName
-                "\"methodName\" : \"getAllUserLicenciesForUser\"," +  //ToDo: Or use : getAllUserLicenciesByCustomer() instead ! Create own service and a method !
-                "\"parameters\" : [\"" + customerEmailOrName + "\"]}";
+                "\"serviceName\" : \"LicenceService\"," +
+                "\"methodName\" : \"getAllUserLicenciesForUser\"" +  //ToDo: Or use : getAllUserLicenciesByCustomer() instead !
+                //",\"parameters\" : [\"" + customerEmailOrName + "\"]}";
+                "}";
     }
 
     // JSON>> Build string to retrieve all users (kids) associated with a customer (parent)
     static public String getKidsOfCustomerString ()
     {
         return "{" +
-                "\"serviceName\" : \"StatisticsService\"," + //ToDo: Find serviceName
-                "\"methodName\" : \"getAllUserLicenciesByCustomer\"," +  //ToDo: Or use : getAllUserLicenciesByCustomer() instead ! Create own service and a method !
+                "\"serviceName\" : \"LicenceService\"," +
+                "\"methodName\" : \"getAllUserLicenciesByCustomer\"" +  //ToDo: Or use : getAllUsersDataOfCustomer() instead !
                 "}";
+    }
+*/
+    // JSON>> Build string to retrieve all users (kids) associated with a customer (parent)
+    static public String getKidsOfCustomerIdString (int customerId)
+    {
+        return "{" +
+                "\"serviceName\" : \"MobileReportService\"," +
+                "\"methodName\" : \"getAllUsersDataOfCustomer\"" +
+                ",\"parameters\" : [\"" + customerId + "\",\"" + 0 /*User Type = CHILD*/ + "\"]}";
     }
 
     // JSON>> Build string to retrieve all themes a kid has learned (and the relevant theme/learn info)
