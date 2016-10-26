@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,7 +21,44 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ActivitySwipeTabs extends AppCompatActivity {
+
+    private int mIdActiveKid = 1100;
+
+    // ---------------------------------------------------------------------------------------
+    // Listener for the async task instance - wait to finish data retrieval
+    private ServerRequestTask.TaskListener taskListener = new ServerRequestTask.TaskListener()
+    {
+        @Override
+        public void onFinished(String serverResponse)
+        {
+
+            try
+            {
+                // ToDo: Maket his working !
+                JSONObject jsnObj = new JSONObject(serverResponse);
+                JSONArray jsnArray = jsnObj.getJSONArray("topicName");
+                mIdActiveKid = jsnObj.getInt("userId");
+            }
+            catch (JSONException jsnEx)
+            {
+                Log.println(Log.ERROR, "JSONException: ", jsnEx.toString());
+            }
+            catch(Exception e)
+            {
+                Log.println(Log.ERROR, "Some Exception: ", e.toString());
+            }
+        }
+    };
+
+    // And the async task instance itself - used for asynchronous data retrieval from server DB
+    private ServerRequestTask mServRqTask = new ServerRequestTask(taskListener);
+    // ---------------------------------------------------------------------------------------
+
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -46,7 +84,7 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         // ------------------------------------
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_activity_swipe_tabs);
+        setContentView(R.layout.activity_swipe_tabs);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -172,6 +210,7 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
+                    getPageData();
                     return "Prehľad učenia";
                 case 1:
                     return "Predmety - stav vedomostí.";
@@ -179,6 +218,11 @@ public class ActivitySwipeTabs extends AppCompatActivity {
                     return "Časový prehľad";
             }
             return null;
+        }
+
+        private void getPageData ()
+        {
+            mServRqTask.execute(JsonSender.getListOfLearnedThemesString(mIdActiveKid));
         }
     }
 }

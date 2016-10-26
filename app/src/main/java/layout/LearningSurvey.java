@@ -95,6 +95,7 @@ public class LearningSurvey extends Fragment {
     @Override
     public void onPause ()
     {
+        super.onPause();
         //ToDo: Comit any changes user has done
     }
 

@@ -71,8 +71,9 @@ public final class JsonSender {
     }
 
     // JSON>> Build string to retrieve all themes a kid has learned (and the relevant theme/learn info)
-    static public String getListOfLearnedThemesString (String userId)
+    static public String getListOfLearnedThemesString (int userId)
     {
+        // ToDo: Cekuj a pouzivaj StatisticsPDO::Statistics($idCustomer, $statisticsEnum, $idUser, $idPackage, $idTheme, $idKnowledge, $date)
         return "{" +
                 "\"serviceName\" : \"LearningService\"," +
                 "\"methodName\" : \"getThemesResultsInfoByUserID\"," +  // or use this method: LearningService->getLastLearnedThemesFromPackageInTime

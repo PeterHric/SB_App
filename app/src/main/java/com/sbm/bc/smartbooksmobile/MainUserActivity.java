@@ -19,12 +19,11 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
 
 import layout.LearningSurvey;
 
@@ -32,16 +31,8 @@ import layout.LearningSurvey;
 public class MainUserActivity  extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener,
                                                                      LearningSurvey.OnFragmentInteractionListener
 {
-    private String mNameOrEmail       = "";
-    private String mPassword          = "";
-    private String mFirtsNameCustomer = "";
-    private String mLastNameCustomer  = "";
-    private int    mIdCustomer        = 0;
-    private String mId                = "";
-    private String mContact           = "";
-    private String mEmail             = "";
-
-    private String mServerResponse    = "";
+    // A reference to the data container - singleton existing all through apps lifetime.
+    private DataContainer mDc = null;
 
     // ---------------------------------------------------------------------------------------
     // Listener for the async task instance - wait to finish data retrieval
@@ -50,20 +41,56 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
         @Override
         public void onFinished(String serverResponse)
         {
-            mServerResponse = serverResponse;
+            // Store the server response for later usage
+            mDc.mMAServerResponse = serverResponse;
 
+            // ToDo: Retrieve and set complete MainActivityData
             try {
-                JSONObject jsnObj = new JSONObject(mServerResponse);
+                // JSONObject jsnObj = new JSONObject(mDc.mMAServerResponse);
+                /*
                 JSONArray jsnArray = jsnObj.getJSONArray("firstName");
-                String kids = "Vase deti:";
+                String tmpKidsNames = "Vase deti:";
                 for (int i = 0; i < jsnArray.length(); ++i)
                 {
                     Log.println(Log.DEBUG,"Your children: ", jsnArray.getJSONObject(i).toString());
-                    kids += "  " + jsnArray.getJSONObject(i).toString();
+                    tmpKidsNames += "  " + jsnArray.getJSONObject(i).toString();
+                }
+                tmpKidsNames += " delete this line";
+                */
+                JSONArray jsnArray = new JSONArray(mDc.mMAServerResponse);
+
+                // Exit on ill data
+                if(jsnArray == null || jsnArray.length() == 0)  return;
+
+                // Reset counter and clear data container
+                mDc.numOfKids = 0;
+                mDc.mListMAData.clear();
+
+                // Retrieve data of all kids of the customer logged in
+                JSONObject jsnObj  = null;
+                for (int i = 0; i < jsnArray.length(); ++i)
+                {
+                    jsnObj= jsnArray.getJSONObject(i);
+                    // Go next item on no data
+                    if(jsnObj == null)  return;
+
+                    DataContainer.MainActivityData mad = new DataContainer.MainActivityData();
+                    mad.mIdUser        = jsnObj.getInt("id");
+                    mad.mFirtsNameUser = jsnObj.getString("firstName");
+                    mad.mLastNameUser  = jsnObj.getString("lastName");
+                    mad.mLastNameUser  = jsnObj.getString("lastName");
+
+                    mDc.mListMAData.add(mad);
+                    ++mDc.numOfKids; // Increment kids counter
                 }
 
-                kids += " delete this line";
-                //Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
+                // Mark that we have just set data
+                mDc.hasMainActivityData = true;
+
+                CharSequence toShow = "Pocet deti: " +  mDc.numOfKids;
+
+                //Toast toast = Toast.makeText(this, "Pocet deti: " +  mDc.numOfKids, Toast.LENGTH_SHORT);
+                //Toast toast = Toast.makeText(this,  toShow, Toast.LENGTH_SHORT);
                 //toast.show();
             }
             catch (JSONException jsnEx)
@@ -90,6 +117,9 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // create/get reference to the data container object
+        mDc = DataContainer.getInstnace();
 
         // ------------------------------------
         // -------- Make it Full Screen -------
@@ -124,19 +154,24 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
         // Extract data sent by LoginActivity
         if(extras !=null)
         {
-            mNameOrEmail = extras.getString("UserName");
-            mPassword = extras.getString("Pwd");
             String serverResponse = extras.getString("ServerResponse");
 
+            mDc.mLAData.mNameOrEmail = extras.getString("UserName");
+            mDc.mLAData.mPassword    = extras.getString("Pwd");
+
+            // ToDo: Remember credentials to internal DB - contacts/profiles somehow.
+            // if (checkedRememberMeCheckBox)
+
+            // Now store User Credential do random data
             try
             {
                 JSONObject Jobject = new JSONObject(serverResponse);
-                mFirtsNameCustomer = Jobject.getString("firstName");
-                mLastNameCustomer  = Jobject.getString("lastName");
-                mIdCustomer        = Jobject.getInt("idCustomer"); //getString("idCustomer");
-                mId                = Jobject.getString("id");
-                mContact           = Jobject.getString("contact");
-                mEmail             = Jobject.getString("email");
+                mDc.mLAData.mFirtsNameCustomer = Jobject.getString("firstName");
+                mDc.mLAData.mLastNameCustomer  = Jobject.getString("lastName");
+                mDc.mLAData.mIdCustomer        = Jobject.getInt("idCustomer"); //getString("idCustomer");
+                mDc.mLAData.mIdUser = Jobject.getInt("id");
+                mDc.mLAData.mContact           = Jobject.getString("contact");
+                mDc.mLAData.mEmail             = Jobject.getString("email");
             }
             catch (JSONException jsEx)
             {
@@ -155,31 +190,25 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
     {
         super.onStart();
 
-        /*
-        try
-        {
-            Thread.sleep(1000);
-        }
-        catch(InterruptedException iex)
-        {
-
-        }
-        */
+        DataContainer dc = DataContainer.getInstnace();
 
         //Set user name
-        if ((mFirtsNameCustomer != "") || (mLastNameCustomer != "")) {
+        if ((dc.mLAData.mFirtsNameCustomer != "") || (dc.mLAData.mLastNameCustomer != "")) {
             // ToDo: Why this returns null ?
             TextView nhun = (TextView) findViewById(R.id.NaviHeaderUserName);
             if(nhun != null)
-                nhun.setText(mFirtsNameCustomer + mLastNameCustomer);
+                nhun.setText(dc.mLAData.mFirtsNameCustomer + dc.mLAData.mLastNameCustomer);
         }
 
         hideSoftKeyboard();
 
-        // Start server request to obtain children data
-        //mServRqTask.execute(JsonSender.getKidsOfCustomerString()); // This returns empty response. Is it no user logged in ?
-        //mServRqTask.execute(JsonSender.getKidsOfParentString(mNameOrEmail));
-        mServRqTask.execute(JsonSender.getKidsOfCustomerIdString(mIdCustomer));
+        // Start server request to obtain data about customer's children
+        if(!mDc.hasMainActivityData)
+        {
+            //mServRqTask.execute(JsonSender.getKidsOfCustomerString()); // This returns empty response. Is it no user logged in ?
+            //mServRqTask.execute(JsonSender.getKidsOfParentString(dc.mLAData.mNameOrEmail));
+            mServRqTask.execute(JsonSender.getKidsOfCustomerIdString(dc.mLAData.mIdCustomer));
+        }
     }
 
     // Hides the soft keyboard - but does not work somehow !
@@ -242,12 +271,15 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // ToDo: This can be perhaps removed
+        DataContainer dc = DataContainer.getInstnace();
+
         switch(id)
         {
             case R.id.nav_camera:
             {
                 // Handle the camera action
-                LearningSurvey ls = LearningSurvey.newInstance("User Name: " + mNameOrEmail, "Password: " + mPassword);
+                LearningSurvey ls = LearningSurvey.newInstance("User Name: " + dc.mLAData.mNameOrEmail, "Password: " + dc.mLAData.mPassword);
                 ls.onAttach(this);
 
                 //ls.onCreateView(this.LAYOUT_INFLATER_SERVICE,null /*this.Container*/,false); //public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
@@ -260,12 +292,11 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
             case R.id.nav_send:
 
                 Intent i = new Intent(getApplicationContext(), ActivitySwipeTabs.class);
-                i.putExtra("UserName", mNameOrEmail);
-                i.putExtra("Pwd", mPassword);
+                i.putExtra("UserName", dc.mLAData.mNameOrEmail);
+                i.putExtra("Pwd", dc.mLAData.mPassword);
                 startActivity(i);
                 break;
         }
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
