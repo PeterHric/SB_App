@@ -21,6 +21,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,7 +82,11 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
                     mad.mIdUser        = jsnObj.getInt("id");
                     mad.mFirtsNameUser = jsnObj.getString("firstName");
                     mad.mLastNameUser  = jsnObj.getString("lastName");
-                    mad.mLastNameUser  = jsnObj.getString("lastName");
+                    mad.mIsAccepted    = jsnObj.getInt("isAccepted")  > 0 ? true : false;
+                    mad.mIsActivated   = jsnObj.getInt("isActivated") > 0 ? true : false;
+                    mad.mIsDeleted     = jsnObj.getInt("isDeleted")   > 0 ? true : false;
+                    mad.mLoginAt       = Timestamp.valueOf(jsnObj.getString("loginAt"));
+                    mad.mLastLoginAt   = Timestamp.valueOf(jsnObj.getString("lastLoginAt"));
 
                     mDc.mListMAData.add(mad);
                     ++mDc.numOfKids; // Increment kids counter
@@ -166,12 +174,13 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
             try
             {
                 JSONObject Jobject = new JSONObject(serverResponse);
+                mDc.mLAData.mIdUser            = Jobject.getInt("id");
+                mDc.mLAData.mIdCustomer        = Jobject.getInt("idCustomer");
                 mDc.mLAData.mFirtsNameCustomer = Jobject.getString("firstName");
                 mDc.mLAData.mLastNameCustomer  = Jobject.getString("lastName");
-                mDc.mLAData.mIdCustomer        = Jobject.getInt("idCustomer"); //getString("idCustomer");
-                mDc.mLAData.mIdUser = Jobject.getInt("id");
                 mDc.mLAData.mContact           = Jobject.getString("contact");
                 mDc.mLAData.mEmail             = Jobject.getString("email");
+                mDc.mLAData.mIdCustomer        = Jobject.getInt("idCustomer");
             }
             catch (JSONException jsEx)
             {
