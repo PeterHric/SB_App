@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="Prehľad učenia:"
-                android:id="@+id/textView5"
+                android:id="@+id/fragmentTitle"
                 android:textAlignment="center" />
         </TableRow>
 

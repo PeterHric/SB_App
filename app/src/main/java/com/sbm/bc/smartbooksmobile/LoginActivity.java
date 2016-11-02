@@ -3,8 +3,10 @@ package com.sbm.bc.smartbooksmobile;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +27,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -69,9 +73,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public enum LoginErrorCode
     {
         OK,
-        NO_NETWORK_ACCESS,
+        SERVER_UNREACHABLE,
         WRONG_USER_TYPE,
-        UNKNOWWN_NAME_OR_EMAIL,
+        UNKNOWN_NAME_OR_EMAIL,
         WRONG_PWD,
         UNKNOWN_ERROR
     }
@@ -175,13 +179,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    // A little utility method to test network availability
+    private boolean isNetworkConnected()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void attemptLogin()
+    {
+
+        hideSoftKeyboard();
+
+        // Have to leave, if authentification task already exists..
         if (mAuthTask != null) {
             return;
         }
@@ -189,6 +205,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
+
+        if (!isNetworkConnected())
+        {
+            mEmailView.setError(getString(R.string.network_unavailable));
+            //focusView = mEmailView;
+            mEmailView.requestFocus();
+            hideSoftKeyboard();
+            return;
+        }
 
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
@@ -333,6 +358,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Uri.parse("android-app://com.sbm.bc.smartbooksmobile/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
+
+        hideSoftKeyboard();
     }
 
     @Override
@@ -385,6 +412,27 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     {
         // Is the view now checked?
         boolean checked = ((CheckBox) view).isChecked();
+    }
+
+    // ToDo: Put this and internet access test to utilities
+    // Hides the soft keyboard - but does not work somehow !
+    private void hideSoftKeyboard()
+    {
+        int mysdk = Build.VERSION.SDK_INT;
+
+        if (Build.VERSION.SDK_INT >= 14)
+        {
+            getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN );
+        }
+        else if (Build.VERSION.SDK_INT >= 5)
+        {
+            if(getCurrentFocus()!=null)
+            {
+                InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            }
+        }
+
     }
 
     /**
@@ -466,13 +514,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
             else if(mServerResponse == "X")
             {
-                mLoginErrCode = LoginErrorCode.NO_NETWORK_ACCESS;
+                mLoginErrCode = LoginErrorCode.SERVER_UNREACHABLE;
                 mLa.setLoginErrorCode(mLoginErrCode);
                 return false;
             }
             else if (mServerResponse.contains("service handler error"))
             {
-                mLoginErrCode = LoginErrorCode.UNKNOWWN_NAME_OR_EMAIL;
+                mLoginErrCode = LoginErrorCode.UNKNOWN_NAME_OR_EMAIL;
                 mLa.setLoginErrorCode(mLoginErrCode);
                 return false;
             }
@@ -490,7 +538,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
-            showProgress(true);
+            //showProgress(true);
+            showProgress(false);
+
 
             if (success)
             {
@@ -505,15 +555,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             {
                 switch(mLoginErrCode)
                 {
-                    case NO_NETWORK_ACCESS:
-                        mPasswordView.setError(getString(R.string.network_unavailable));
+                    case SERVER_UNREACHABLE:
+                        mPasswordView.setError(getString(R.string.server_unreachable));
                         break;
 
                     case WRONG_USER_TYPE:
                         mPasswordView.setError(getString(R.string.error_incorrect_user_type));
                         break;
 
-                    case UNKNOWWN_NAME_OR_EMAIL:
+                    case UNKNOWN_NAME_OR_EMAIL:
                         mPasswordView.setError(getString(R.string.error_invalid_credentials));
                         break;
 

@@ -18,10 +18,13 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+// THIS WHOLE CODE CAN GO OUT AS IT IS A DUPLICATE OF ActivitySwipeTabs
+
 public class SurveyTabs extends AppCompatActivity {
 
     /*
      Can use these for quick messages to show on touch on day in weekly view
+     Or you can use Toast, or SnackBar messages
 
     showDialog("Downloaded " + result + " bytes");
 

@@ -25,9 +25,39 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ActivitySwipeTabs extends AppCompatActivity {
+import java.sql.Timestamp;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-    private int mIdActiveKid = 1100;
+public class ActivitySwipeTabs extends AppCompatActivity
+{
+    ///< A reference to the data container - singleton existing all through apps lifetime.
+    private DataContainer mDc = null;
+
+    // ToDo: Should we put these to the global DataContainer ??
+    private int mIdActiveKidIdx = 0;
+    private int mIdActiveKidUserId = mDc.mListMAData.get(mIdActiveKidIdx).mIdUser;
+
+    /**
+     * @brief Types of fragments existing in this activity
+     */
+    enum FragmentName
+    {
+        LEARNING_SURVEY,
+        KNOWLEDGE_BY_SUBJECT,
+        WEEKLY_REPORT,
+
+        FRAGMENT_MAX
+    }
+
+    /**
+     * @brief This is to distinguish which fragment is currently active
+     */
+    private FragmentName mActiveFragment;
+
+
+    ///< This is to lock access to the asynchronous task, which is a critical - shared resource.
+    Lock mAsyncTaskLock = new ReentrantLock();
 
     // ---------------------------------------------------------------------------------------
     // Listener for the async task instance - wait to finish data retrieval
@@ -36,28 +66,101 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         @Override
         public void onFinished(String serverResponse)
         {
-
-            try
+            // Retrieve and set appropriate data - based on which fragment is active (has sent req.).
+            switch (mActiveFragment)
             {
-                // ToDo: Maket his working !
-                JSONObject jsnObj = new JSONObject(serverResponse);
-                JSONArray jsnArray = jsnObj.getJSONArray("topicName");
-                mIdActiveKid = jsnObj.getInt("userId");
-            }
-            catch (JSONException jsnEx)
-            {
-                Log.println(Log.ERROR, "JSONException: ", jsnEx.toString());
-            }
-            catch(Exception e)
-            {
-                Log.println(Log.ERROR, "Some Exception: ", e.toString());
+                case LEARNING_SURVEY:
+                    mDc.mLSFServerResponse = serverResponse; // Store the server response for later usage
+                    parseLearningSurveyData(serverResponse); // Call processing method
+                    break;
+                case KNOWLEDGE_BY_SUBJECT:
+                    // Call processing method
+                    break;
+                case WEEKLY_REPORT:
+                    // Call processing method
+                    break;
+                default:
+                    break;
             }
         }
     };
 
+
     // And the async task instance itself - used for asynchronous data retrieval from server DB
     private ServerRequestTask mServRqTask = new ServerRequestTask(taskListener);
     // ---------------------------------------------------------------------------------------
+
+
+    /*
+    Can use these for quick messages to show on touch on day in weekly view,
+    Or you can use Toast, or SnackBar messages
+
+    showDialog("Downloaded " + result + " bytes");
+
+    public void showMessage(String tag, String message)
+    {
+      String s = tag + ":" + message;
+      Toast toast = Toast.makeText(this, s, Toast.LENGTH_SHORT);
+      toast.show();
+      Log.d(tag,message);
+    }
+    */
+
+    private void parseLearningSurveyData(String serverResponse)
+    {
+        try
+        {
+            JSONArray jsnArray = new JSONArray(serverResponse);
+
+            // Exit on ill data
+            if(jsnArray == null || jsnArray.length() == 0)  return;
+
+            //mIdActiveKidUserId , mIdActiveKidIdx
+
+            // Retrieve data the currently active kid
+            JSONObject jsnObj  = null;
+            for (int i = 0; i < jsnArray.length(); ++i)
+            {
+                jsnObj= jsnArray.getJSONObject(i);
+                // Go next item on no data
+                if(jsnObj == null)  return;
+
+                DataContainer.LearningSurveyFragmentData lsfd = new DataContainer.LearningSurveyFragmentData();
+                lsfd.mIdUser        = jsnObj.getInt("id");
+                lsfd.mFirtsNameUser = jsnObj.getString("firstName");
+                lsfd.mLastNameUser  = jsnObj.getString("lastName");
+                lsfd.mIsAccepted    = jsnObj.getInt("isAccepted")  > 0 ? true : false;
+                lsfd.mIsActivated   = jsnObj.getInt("isActivated") > 0 ? true : false;
+                lsfd.mIsDeleted     = jsnObj.getInt("isDeleted")   > 0 ? true : false;
+                lsfd.mLoginAt       = Timestamp.valueOf(jsnObj.getString("loginAt"));
+                lsfd.mLastLoginAt   = Timestamp.valueOf(jsnObj.getString("lastLoginAt"));
+
+                mDc.mListLSFData.add(lsfd);
+            }
+
+            // Mark that we have just set data for this kid
+            mDc.mListLSFData.get(mIdActiveKidIdx).hasLearningSurveyFgmData = true;
+
+            CharSequence toShow = "Zistene udaje ucenia pre dieta: " + mIdActiveKidIdx;
+
+            Snackbar.make(findViewById(R.id.fab), toShow, Snackbar.LENGTH_SHORT)
+                    .setAction("Action", null).show();
+
+        }
+        catch (JSONException jsnEx)
+        {
+            Log.println(Log.ERROR, "JSONException: ", jsnEx.toString());
+        }
+        catch(Exception e)
+        {
+            Log.println(Log.ERROR, "Some Exception: ", e.toString());
+        }
+        finally
+        {
+            mAsyncTaskLock.unlock();
+        }
+
+    }
 
 
     /**
@@ -78,6 +181,9 @@ public class ActivitySwipeTabs extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        // Get instance reference
+        mDc = DataContainer.getInstnace();
+
         // ------------------------------------
         // -------- Make it Full Screen -------
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -89,20 +195,19 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
+
+        // Create the adapter that will return a fragment for each of the (3?) primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Tu bude skratka napr. refresh.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -138,9 +243,8 @@ public class ActivitySwipeTabs extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
-
-
+    public static class PlaceholderFragment extends Fragment
+    {
         /*  Custom Web View display
          * 	   String customHtml = "<html><body><h1>Hello, WebView</h1></body></html>";
          *     webView.loadData(customHtml, "text/html", "UTF-8");
@@ -166,26 +270,56 @@ public class ActivitySwipeTabs extends AppCompatActivity {
             return fragment;
         }
 
+        // Called when fragment is first time created
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            //View rootView = inflater.inflate(R.layout.fragment_activity_swipe_tabs, container, false);
-            View rootView = inflater.inflate(R.layout.fragment_learning_survey, container, false);
-            //TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            TextView textView = (TextView) rootView.findViewById(R.id.textView5);
-            //textView.setText(getString(R.string.prehlad, getArguments().getInt(ARG_SECTION_NUMBER)));
             int sectionNum = getArguments().getInt(ARG_SECTION_NUMBER);
-            textView.setText( mSectionsPagerAdapter.getPageTitle(sectionNum) );
+            View rootView = null;
+
+            switch(sectionNum)
+            {
+                case 0: // ToDo: Create fragment_learning_survey.xml !
+                    rootView = inflater.inflate(R.layout.fragment_choose_kid, container, false);
+                    break;
+                case 1:
+                    rootView = inflater.inflate(R.layout.fragment_knowledge_by_subject, container, false);
+                    break;
+                case 2:
+                    rootView = inflater.inflate(R.layout.fragment_weekly_report, container, false);
+                    break;
+            }
 
             return rootView;
         }
-    } // End of class ActivitySwipeTabs
+
+        // Called each time when fragment goes to front
+        @Override
+        public void onStart()
+        {
+            super.onStart();
+
+            // ToDo: Erase it. No need to set proper name of the fragment - this is done staticaly in the xml
+            //TextView textView = (TextView) findViewById(R.id.section_label);
+            //TextView textView = (TextView) findViewById(R.id.fragmentTitle);
+            //textView.setText(getString(R.string.prehlad, getArguments().getInt(ARG_SECTION_NUMBER)));
+            //textView.setText( mSectionsPagerAdapter.getPageTitle(sectionNum) );
+            //textView.refreshDrawableState(); // ToDo: Do we need this at all ?
+
+            // Initiate fragment's data retrieval from the server
+            int sectionNum = getArguments().getInt(ARG_SECTION_NUMBER);
+            String pageTitle = mSectionsPagerAdapter.getPageTitle(sectionNum);
+        }
+
+    } // End of class  PlaceholderFragment
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class SectionsPagerAdapter extends FragmentPagerAdapter
+    {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -195,34 +329,76 @@ public class ActivitySwipeTabs extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            return PlaceholderFragment.newInstance(position);
         }
-
 
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 3 total pages ~ fragments.
             return 3;
         }
 
         @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
+        public String getPageTitle(int position)
+        {
+            // We are entering critical section - access to async task - only one job allowed at a time
+            mAsyncTaskLock.lock();
+
+            String title = "";
+            switch (position)
+            {
                 case 0:
-                    getPageData();
-                    return "Prehľad učenia";
+                    mActiveFragment = FragmentName.LEARNING_SURVEY;
+                    getLearningSurveyFragmentData();
+                    title = "Celkový prehľad učenia.";
+                    break;
+
                 case 1:
-                    return "Predmety - stav vedomostí.";
+                    mActiveFragment = FragmentName.KNOWLEDGE_BY_SUBJECT;
+                    //getKnowledgeBySubjectsSurveyFragmentData();
+                    title = "Predmety - stav vedomostí.";
+                    break;
+
                 case 2:
-                    return "Časový prehľad";
+                    mActiveFragment = FragmentName.WEEKLY_REPORT;
+                    //getWeekReportFragmentData();
+                    title = "Týždňový prehľad naučených tém.";
+                    break;
+
+                default:
+                    mActiveFragment = FragmentName.FRAGMENT_MAX;
+                    title = "Neznamy fragment"; // This shall never occur though
+                    break;
             }
-            return null;
+
+            return title;
         }
 
-        private void getPageData ()
+        private void getLearningSurveyFragmentData()
         {
-            mServRqTask.execute(JsonSender.getListOfLearnedThemesString(mIdActiveKid));
+            if(!DataContainer.getInstnace().mListLSFData.get(mIdActiveKidIdx).hasLearningSurveyFgmData)
+            { // Only do this, if needed data for the kid are not yet acquired
+                mServRqTask.execute(JsonSender.getListOfLearnedThemesString(mIdActiveKidUserId));
+            }
         }
-    }
-}
+
+        private void getKnowledgeBySubjectsSurveyFragmentData()
+        {
+            if(!DataContainer.getInstnace().hasKnowledgeBySubjectsFgmData)
+            { // Only do this, if needed data are not yet acquired
+                mServRqTask.execute(JsonSender.getKnowledgeBySubjectString(mIdActiveKidUserId));
+            }
+        }
+
+        private void getWeekReportFragmentData()
+        {
+            if(!DataContainer.getInstnace().hasWeekReportFgmData)
+            { // Only do this, if needed data are not yet acquired
+                mServRqTask.execute(JsonSender.getWeekReportSurveyString(mIdActiveKidUserId));
+            }
+        }
+
+    } // End of class SectionsPagerAdapter
+
+} // End of class ActivitySwipeTabs

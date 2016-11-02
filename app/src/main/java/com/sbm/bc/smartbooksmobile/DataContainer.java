@@ -23,7 +23,7 @@ public class DataContainer {
     {
         public String mNameOrEmail       = "";
         public String mPassword          = "";
-        public String mFirtsNameCustomer = "";
+        public String mFirstNameCustomer = "";
         public String mLastNameCustomer  = "";
         public int mIdCustomer           = -1;
         public int mIdUser               = -1;
@@ -35,12 +35,12 @@ public class DataContainer {
 
 
     // ------------------- Main User Activity Data ----------------
-    static boolean hasMainActivityData = false;
+    static boolean hasMainActivityData     = false;
     // @brief This contains whole JSON returned line of user of type = 'CHILD'
-    static public String mMAServerResponse      = "";
+    static public String mMAServerResponse = "";
+    // @brief This contains parsed basic data about user (child of the logged customer)
     static public class MainActivityData
     {
-        // @brief This contains whole JSON data string returned after user is logged in (i.e. info about the customer)
         public int mIdUser               = -1;
         public String mNameOrEmail       = "";
         public String mFirtsNameUser     = "";
@@ -61,14 +61,39 @@ public class DataContainer {
 
 
     // ------------------- Learning Survey Fragment Data ----------------
-    boolean hasLearningSurveyFgmData = false;
     // @brief This contains whole JSON returned line after learning report request of particular user
-    public ArrayList<String> mKidsLearningSurvey = new ArrayList<>();
+    public String mLSFServerResponse      = "";
+    // @brief A data container class to hold parsed report about learning
+    static public class LearningSurveyFragmentData
+    {
+        //ToDo: Fill in data members - or just display report as web content formatted by PHP sever
+        boolean hasLearningSurveyFgmData     = false;
+
+        public int mIdUser               = -1;
+        public String mNameOrEmail       = "";
+        public String mFirtsNameUser     = "";
+        public String mLastNameUser      = "";
+        public String mContact           = "";
+        public String mEmail             = "";
+        public Date    mLoginAt          = null;
+        public Date    mLastLoginAt      = null;
+        public boolean mIsDeleted        = false;
+        public boolean mIsAccepted       = false;
+        public boolean mIsActivated      = false;
+    }
+    ArrayList<LearningSurveyFragmentData> mListLSFData = new ArrayList<LearningSurveyFragmentData>();
 
 
 
-    // ------------------- Learning Survey Fragment Data ----------------
-    boolean hasWeeklyViewFgmData = false;
+    // ------------------- Knowledge By Subjects Fragment Data ----------------
+    boolean hasKnowledgeBySubjectsFgmData = false;
+    // @brief This contains whole JSON returned line after weekly view report request of particular user
+    public ArrayList<String> mKnowledgeBySubjectsSurvey = new ArrayList<>();
+
+
+
+    // ------------------- Weekly Survey Fragment Data ----------------
+    boolean hasWeekReportFgmData = false;
     // @brief This contains whole JSON returned line after weekly view report request of particular user
     public ArrayList<String> mWeeklyViewSurvey = new ArrayList<>();
 

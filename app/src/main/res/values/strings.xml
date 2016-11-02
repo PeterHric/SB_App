@@ -31,5 +31,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="User_Name">Užívateľ:</string>
     <string name="title_activity_activity_swipe_tabs">Posúvateľné prehľady štatistík</string>
+    <string name="server_unreachable">Server SmartBooks je nedostupný.</string>
     <string name="network_unavailable">Sieťové spojenie nedostupné.</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.sbm.bc.smartbooksmobile;
 
 import android.content.Intent;
+import android.content.pm.LabeledIntent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,10 +20,8 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 
 import org.json.JSONArray;
@@ -48,19 +47,8 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
             // Store the server response for later usage
             mDc.mMAServerResponse = serverResponse;
 
-            // ToDo: Retrieve and set complete MainActivityData
+            // Retrieve and set complete MainActivityData
             try {
-                // JSONObject jsnObj = new JSONObject(mDc.mMAServerResponse);
-                /*
-                JSONArray jsnArray = jsnObj.getJSONArray("firstName");
-                String tmpKidsNames = "Vase deti:";
-                for (int i = 0; i < jsnArray.length(); ++i)
-                {
-                    Log.println(Log.DEBUG,"Your children: ", jsnArray.getJSONObject(i).toString());
-                    tmpKidsNames += "  " + jsnArray.getJSONObject(i).toString();
-                }
-                tmpKidsNames += " delete this line";
-                */
                 JSONArray jsnArray = new JSONArray(mDc.mMAServerResponse);
 
                 // Exit on ill data
@@ -85,17 +73,34 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
                     mad.mIsAccepted    = jsnObj.getInt("isAccepted")  > 0 ? true : false;
                     mad.mIsActivated   = jsnObj.getInt("isActivated") > 0 ? true : false;
                     mad.mIsDeleted     = jsnObj.getInt("isDeleted")   > 0 ? true : false;
-                    mad.mLoginAt       = Timestamp.valueOf(jsnObj.getString("loginAt"));
-                    mad.mLastLoginAt   = Timestamp.valueOf(jsnObj.getString("lastLoginAt"));
+                    try
+                    {
+                        String sTimeStamp = jsnObj.getString("loginAt");
+                        mad.mLoginAt      = Timestamp.valueOf(sTimeStamp == null ? "01.01.1900" : "sTimeStamp");
+                        sTimeStamp        = jsnObj.getString("lastLoginAt");
+                        mad.mLastLoginAt  = Timestamp.valueOf(sTimeStamp == null ? "01.01.1900" : "sTimeStamp" );
+                    }
+                    catch (Exception e)
+                    {
+                        Log.println(Log.ERROR, "Some Exception: ", e.toString());
+                    }
 
                     mDc.mListMAData.add(mad);
+
+                    // Add LearningSurvey Data container item for the new retrieved kid !
+                    mDc.mListLSFData.add(new DataContainer.LearningSurveyFragmentData());
+                    // ToDo: Add WeeklyView, and KnowledgeBySubject data container items
+
                     ++mDc.numOfKids; // Increment kids counter
                 }
 
                 // Mark that we have just set data
                 mDc.hasMainActivityData = true;
 
-                CharSequence toShow = "Pocet deti: " +  mDc.numOfKids;
+                CharSequence toShow = "Mate registrovanych " + mDc.numOfKids + " deti.";
+
+                Snackbar.make(findViewById(R.id.fab), toShow, Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
 
                 //Toast toast = Toast.makeText(this, "Pocet deti: " +  mDc.numOfKids, Toast.LENGTH_SHORT);
                 //Toast toast = Toast.makeText(this,  toShow, Toast.LENGTH_SHORT);
@@ -176,7 +181,7 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
                 JSONObject Jobject = new JSONObject(serverResponse);
                 mDc.mLAData.mIdUser            = Jobject.getInt("id");
                 mDc.mLAData.mIdCustomer        = Jobject.getInt("idCustomer");
-                mDc.mLAData.mFirtsNameCustomer = Jobject.getString("firstName");
+                mDc.mLAData.mFirstNameCustomer = Jobject.getString("firstName");
                 mDc.mLAData.mLastNameCustomer  = Jobject.getString("lastName");
                 mDc.mLAData.mContact           = Jobject.getString("contact");
                 mDc.mLAData.mEmail             = Jobject.getString("email");
@@ -199,14 +204,12 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
     {
         super.onStart();
 
-        DataContainer dc = DataContainer.getInstnace();
-
         //Set user name
-        if ((dc.mLAData.mFirtsNameCustomer != "") || (dc.mLAData.mLastNameCustomer != "")) {
+        if ((mDc.mLAData.mFirstNameCustomer != "") || (mDc.mLAData.mLastNameCustomer != "")) {
             // ToDo: Why this returns null ?
             TextView nhun = (TextView) findViewById(R.id.NaviHeaderUserName);
             if(nhun != null)
-                nhun.setText(dc.mLAData.mFirtsNameCustomer + dc.mLAData.mLastNameCustomer);
+                nhun.setText(mDc.mLAData.mFirstNameCustomer + mDc.mLAData.mLastNameCustomer);
         }
 
         hideSoftKeyboard();
@@ -216,20 +219,19 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
         {
             //mServRqTask.execute(JsonSender.getKidsOfCustomerString()); // This returns empty response. Is it no user logged in ?
             //mServRqTask.execute(JsonSender.getKidsOfParentString(dc.mLAData.mNameOrEmail));
-            mServRqTask.execute(JsonSender.getKidsOfCustomerIdString(dc.mLAData.mIdCustomer));
+            mServRqTask.execute(JsonSender.getKidsOfCustomerIdString(mDc.mLAData.mIdCustomer));
         }
     }
 
+    // ToDo: Put this and internet access test to utilities
     // Hides the soft keyboard - but does not work somehow !
-    public void hideSoftKeyboard()
+    private void hideSoftKeyboard()
     {
         int mysdk = Build.VERSION.SDK_INT;
 
         if (Build.VERSION.SDK_INT >= 14)
         {
-            getWindow().setSoftInputMode(
-                    WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
-            );
+            getWindow().setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN );
         }
         else if (Build.VERSION.SDK_INT >= 5)
         {
@@ -280,18 +282,18 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        // ToDo: This can be perhaps removed
-        DataContainer dc = DataContainer.getInstnace();
+
+        Intent i = null;
 
         switch(id)
         {
             case R.id.nav_camera:
             {
                 // Handle the camera action
-                LearningSurvey ls = LearningSurvey.newInstance("User Name: " + dc.mLAData.mNameOrEmail, "Password: " + dc.mLAData.mPassword);
-                ls.onAttach(this);
-
+                //LearningSurvey ls = LearningSurvey.newInstance("User Name: " + mDc.mLAData.mNameOrEmail, "Password: " + mDc.mLAData.mPassword);
+                //ls.onAttach(this);
                 //ls.onCreateView(this.LAYOUT_INFLATER_SERVICE,null /*this.Container*/,false); //public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
+                i = new Intent(getApplicationContext(), SurveyTabs.class);
                 break;
             }
             case R.id.nav_gallery:
@@ -300,13 +302,16 @@ public class MainUserActivity  extends AppCompatActivity  implements NavigationV
             case R.id.nav_share:
             case R.id.nav_send:
 
-                Intent i = new Intent(getApplicationContext(), ActivitySwipeTabs.class);
-                i.putExtra("UserName", dc.mLAData.mNameOrEmail);
-                i.putExtra("Pwd", dc.mLAData.mPassword);
-                startActivity(i);
+                i = new Intent(getApplicationContext(), ActivitySwipeTabs.class);
+                i.putExtra("UserName", mDc.mLAData.mNameOrEmail);
+                i.putExtra("Pwd", mDc.mLAData.mPassword);
                 break;
         }
 
+        // Start the selected activity
+        if(null != i) startActivity(i);
+
+        // Close the drawer after any menu item was touched
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

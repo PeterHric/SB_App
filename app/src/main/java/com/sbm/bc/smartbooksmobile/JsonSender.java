@@ -19,15 +19,19 @@ public final class JsonSender {
 
     // Guard - Jano Vlk
     //static public String phpServerUrl = "http://www.brainycoach.com/guard/api/index.php";
-    // Brainy - Mario Kahun
+    // Brainy - Mario Kahun -- Old stuff !
     // static public String phpServerUrl = "http://www.brainycoach.com/_api/api/bc/index.php";
     // Mobile service - Peto Hric 'n Silvo Adamik
     //static public String phpServerUrl = "http://www.brainycoach.com/bc-mobile-client-server/index.php";
     // Peter H. Local service:
     static public String phpServerUrl = "http://172.30.20.16/bc-mobile-client-server/index.php";
+    //static public String phpServerUrl = "http://192.168.1.14/bc-mobile-client-server/index.php";
 
     // Tmp - for testing where Mario copied his new stuff:
     //static public String phpServerUrl = "http://www.brainycoach.com/app/api/index.php";
+
+    // !! ###### THE ULTIMATE - Life - Sharp Server ####### !!
+    //static public String phpServerUrl = "http://www.smartbooks.sk/app/api/index.php";
 
     // JSON>> Build authentication string with received credentials
     static public String getLoginCredentialString (String nameOrEmail, String pwd)
@@ -71,7 +75,16 @@ public final class JsonSender {
     }
 
     // JSON>> Build string to retrieve all themes a kid has learned (and the relevant theme/learn info)
-    static public String getListOfLearnedThemesString (int userId)
+    static public String getListOfLearnedThemesString (int userId) {
+        // ToDo: Cekuj a pouzivaj StatisticsPDO::Statistics($idCustomer, $statisticsEnum, $idUser, $idPackage, $idTheme, $idKnowledge, $date)
+        return "{" +
+                "\"serviceName\" : \"LearningService\"," +
+                "\"methodName\" : \"getThemesResultsInfoByUserID\"," +  // or use this method: LearningService->getLastLearnedThemesFromPackageInTime
+                "\"parameters\" : [\"" + userId + "\"]}";
+    }
+
+    // JSON>> Build string to retrieve knowledge by subject and topic per given kid
+    static public String getKnowledgeBySubjectString(int userId)
     {
         // ToDo: Cekuj a pouzivaj StatisticsPDO::Statistics($idCustomer, $statisticsEnum, $idUser, $idPackage, $idTheme, $idKnowledge, $date)
         return "{" +
@@ -79,6 +92,19 @@ public final class JsonSender {
                 "\"methodName\" : \"getThemesResultsInfoByUserID\"," +  // or use this method: LearningService->getLastLearnedThemesFromPackageInTime
                 "\"parameters\" : [\"" + userId + "\"]}";
     }
+
+
+    // JSON>> Build string to retrieve a report for last week for given kid
+    static public String getWeekReportSurveyString(int userId)
+    {
+        // ToDo: Cekuj a pouzivaj StatisticsPDO::Statistics($idCustomer, $statisticsEnum, $idUser, $idPackage, $idTheme, $idKnowledge, $date)
+        return "{" +
+                "\"serviceName\" : \"StatisticsService\"," +
+                "\"methodName\" : \"getThemesResultsInfoByUserID\"," +  // or use this method: LearningService->getLastLearnedThemesFromPackageInTime
+                "\"parameters\" : [\"" + userId + "\"]}";
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
     static public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     static OkHttpClient client = new OkHttpClient();
